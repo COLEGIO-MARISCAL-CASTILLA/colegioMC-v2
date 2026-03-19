@@ -12,6 +12,8 @@ import AdminDashboard from "@/pages/admin/dashboard";
 import Students from "@/pages/admin/students";
 import Teachers from "@/pages/admin/teachers";
 import Classrooms from "@/pages/admin/classrooms";
+import AttendanceHistory from "@/pages/admin/attendance-history";
+import StudentAttendance from "@/pages/admin/student-attendance";
 import TeacherAttendance from "@/pages/teacher/attendance";
 import StudentProfile from "@/pages/student/profile";
 import NotFound from "@/pages/not-found";
@@ -56,6 +58,12 @@ function Router() {
       </Route>
       <Route path="/classrooms">
         <AppLayout><ProtectedRoute component={Classrooms} allowedRoles={['DIRECTORA']} /></AppLayout>
+      </Route>
+      <Route path="/attendance-history">
+        <AppLayout><ProtectedRoute component={AttendanceHistory} allowedRoles={['DIRECTORA']} /></AppLayout>
+      </Route>
+      <Route path="/students/:id/attendance">
+        <AppLayout><ProtectedRoute component={StudentAttendance} allowedRoles={['DIRECTORA']} /></AppLayout>
       </Route>
 
       {/* Fallback to 404 */}
