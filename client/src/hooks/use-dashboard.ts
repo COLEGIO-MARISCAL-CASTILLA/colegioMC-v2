@@ -5,9 +5,9 @@ export function useDashboardStats() {
   return useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
-      // Crear AbortController con timeout manual
+      // Crear AbortController con timeout más corto para evitar timeout del servidor
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 segundos
       
       try {
         const res = await fetch(api.dashboard.stats.path, { 
@@ -38,12 +38,25 @@ export function useDashboardStats() {
         }>
       } catch (error) {
         clearTimeout(timeoutId);
+        
+        // Si es un abort, retornar datos por defecto
+        if (error instanceof Error && error.name === 'AbortError') {
+          console.warn('Dashboard stats request timed out, using fallback data');
+          return {
+            totalStudents: 0, 
+            todayAttendance: 0, 
+            absencePercentage: 0,
+            totalTeachers: 0,
+            totalClassrooms: 0
+          };
+        }
+        
         throw error;
       }
     },
-    staleTime: 1000 * 60 * 10, // 10 minutos para reducir carga
+    staleTime: 1000 * 60 * 15, // 15 minutos para reducir carga
     refetchOnWindowFocus: false, // Evitar bucle infinito
-    retry: 1, // Solo un reintento
-    gcTime: 1000 * 60 * 5, // Limpiar cache después de 5 minutos
+    retry: 0, // Sin reintentos para evitar más timeouts
+    gcTime: 1000 * 60 * 10, // Limpiar cache después de 10 minutos
   });
 }

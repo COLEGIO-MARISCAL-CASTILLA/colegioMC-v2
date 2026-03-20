@@ -368,61 +368,48 @@ export async function registerRoutes(
     try {
       console.log('🔄 Fetching dashboard stats...');
       
-      // Agregar timeout para evitar que se quede atascado
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Database timeout')), 5000); // 5 segundos timeout
-      });
-      
-      // Usar Promise.race para evitar que se atasque
-      const result = await Promise.race([
-        (async () => {
-          // Usar los métodos del storage que ya funcionan
-          const studentsList = await storage.getStudents();
-          console.log(`📊 Found ${studentsList.length} students`);
-          
-          const teachersList = await storage.getTeachers();
-          console.log(`👥 Found ${teachersList.length} teachers`);
-          
-          const classroomsList = await storage.getClassrooms();
-          console.log(`🏫 Found ${classroomsList.length} classrooms`);
-          
-          const today = new Date().toISOString().split('T')[0];
-          const attendanceToday = await storage.getAttendances(today);
-          console.log(`✅ Found ${attendanceToday.length} attendance records for today`);
-
-          const totalStudents = studentsList.length;
-          const totalTeachers = teachersList.length;
-          const totalClassrooms = classroomsList.length;
-          const todayAttendance = attendanceToday.length;
-          const absences = attendanceToday.filter(a => a.estado === 'Ausente').length;
-          
-          let absencePercentage = 0;
-          if (todayAttendance > 0) {
-            absencePercentage = Math.round((absences / todayAttendance) * 100);
-          }
-
-          const stats = {
-            totalStudents,
-            totalTeachers,
-            totalClassrooms,
-            todayAttendance,
-            absencePercentage
-          };
-          
-          console.log('📈 Dashboard stats calculated:', stats);
-          return stats;
-        })(),
-        timeoutPromise
+      // Usar Promise.all para ejecutar en paralelo y reducir tiempo
+      const [studentsList, teachersList, classroomsList] = await Promise.all([
+        storage.getStudents(),
+        storage.getTeachers(),
+        storage.getClassrooms()
       ]);
       
-      res.json(result);
+      console.log(`📊 Found ${studentsList.length} students, ${teachersList.length} teachers, ${classroomsList.length} classrooms`);
+      
+      // La consulta de attendance puede ser más lenta, hacerla por separado
+      const today = new Date().toISOString().split('T')[0];
+      const attendanceToday = await storage.getAttendances(today);
+      console.log(`✅ Found ${attendanceToday.length} attendance records for today`);
+
+      const totalStudents = studentsList.length;
+      const totalTeachers = teachersList.length;
+      const totalClassrooms = classroomsList.length;
+      const todayAttendance = attendanceToday.length;
+      const absences = attendanceToday.filter(a => a.estado === 'Ausente').length;
+      
+      let absencePercentage = 0;
+      if (todayAttendance > 0) {
+        absencePercentage = Math.round((absences / todayAttendance) * 100);
+      }
+
+      const stats = {
+        totalStudents,
+        totalTeachers,
+        totalClassrooms,
+        todayAttendance,
+        absencePercentage
+      };
+      
+      console.log('📈 Dashboard stats calculated:', stats);
+      res.json(stats);
     } catch (error) {
       console.error('❌ Error in dashboard stats:', error);
       if (error instanceof Error) {
         console.error('❌ Stack trace:', error.stack);
       }
       
-      // Enviar respuesta incluso si hay error para que el frontend no se quede atascado
+      // Enviar respuesta inmediatamente para evitar timeout
       res.status(500).json({ 
         error: 'Internal server error',
         message: 'Error loading dashboard stats',
