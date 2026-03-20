@@ -15,7 +15,8 @@ export function useDashboardStats() {
         totalClassrooms: number
       }>
     },
-    staleTime: 0, // Siempre fresco
-    refetchOnWindowFocus: true,
+    staleTime: 1000 * 60 * 5, // 5 minutos
+    refetchOnWindowFocus: false, // Evitar bucle infinito
+    retry: 2, // Limitar reintentos
   });
 }

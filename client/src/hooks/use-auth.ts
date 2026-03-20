@@ -14,6 +14,8 @@ export function useAuth() {
       return res.json(); // Relying on generic JSON parsing since it's an internal type
     },
     retry: false,
+    staleTime: 1000 * 60 * 5, // 5 minutos
+    refetchOnWindowFocus: false, // Evitar bucle infinito
   });
 
   const loginMutation = useMutation({
