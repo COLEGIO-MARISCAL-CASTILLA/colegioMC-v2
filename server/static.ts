@@ -3,8 +3,8 @@ import fs from "fs";
 import path from "path";
 
 export function serveStatic(app: Express) {
-  // prefer built client at project root: ./dist/public
-  const distPath = path.resolve(process.cwd(), "dist", "public");
+  // prefer built client at project root: ./dist (not ./dist/public)
+  const distPath = path.resolve(process.cwd(), "dist");
   if (!fs.existsSync(distPath)) {
     throw new Error(
       `Could not find the build directory: ${distPath}, make sure to run the build script (npm run build)`,
