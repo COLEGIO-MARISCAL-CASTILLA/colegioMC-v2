@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import { AppLayout } from "@/components/layout";
 import { useAuth } from "@/hooks/use-auth";
 import { LoadingSpinner } from "@/components/ui-components";
+import { useMemo } from "react";
 
 // Pages
 import Login from "@/pages/auth/login";
@@ -21,17 +22,25 @@ import NotFound from "@/pages/not-found";
 function ProtectedRoute({ component: Component, allowedRoles }: { component: any, allowedRoles: string[] }) {
   const { user, isLoading } = useAuth();
   
+  // Memorizar rol para evitar re-renders
+  const userRole = useMemo(() => (user?.rol || '').toString().toUpperCase(), [user?.rol]);
+  const isAllowed = useMemo(() => {
+    const allowed = allowedRoles.map(r => r.toString().toUpperCase());
+    return allowed.includes(userRole);
+  }, [userRole, allowedRoles]);
+  
   if (isLoading) return <LoadingSpinner size="lg" />;
   if (!user) return <Redirect to="/login" />;
-  const role = (user.rol || '').toString().toUpperCase();
-  const allowed = allowedRoles.map(r => r.toString().toUpperCase());
-  if (!allowed.includes(role)) return <Redirect to="/" />;
+  if (!isAllowed) return <Redirect to="/" />;
   
   return <Component />;
 }
 
 function Router() {
   const { user, isLoading } = useAuth();
+
+  // Memorizar el rol para evitar re-renders
+  const userRole = useMemo(() => (user?.rol || '').toString().toUpperCase(), [user?.rol]);
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-background"><LoadingSpinner size="lg" /></div>;
 
@@ -43,8 +52,8 @@ function Router() {
 
       <Route path="/">
         {!user ? <Redirect to="/login" /> : 
-         (user.rol || '').toString().toUpperCase() === 'DIRECTORA' ? <AppLayout><AdminDashboard /></AppLayout> :
-         (user.rol || '').toString().toUpperCase() === 'PROFESOR' ? <AppLayout><TeacherAttendance /></AppLayout> :
+         userRole === 'DIRECTORA' ? <AppLayout><AdminDashboard /></AppLayout> :
+         userRole === 'PROFESOR' ? <AppLayout><TeacherAttendance /></AppLayout> :
          <AppLayout><StudentProfile /></AppLayout>
         }
       </Route>
