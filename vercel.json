@@ -1,18 +1,18 @@
 {
   "version": 2,
   "functions": {
-    "dist/index.mjs": {
+    "api/index.js": {
       "runtime": "nodejs18.x"
     }
   },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/dist/index.mjs"
+      "destination": "/api/index.js"
     },
     {
       "source": "/(.*)",
-      "destination": "/dist/index.html"
+      "destination": "/dist/public/index.html"
     }
   ]
 }
