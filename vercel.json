@@ -19,10 +19,5 @@
       "src": "/(.*)",
       "dest": "dist/$1"
     }
-  ],
-  "functions": {
-    "dist/index.mjs": {
-      "maxDuration": 10
-    }
-  }
+  ]
 }
