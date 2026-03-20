@@ -75,7 +75,9 @@ export function useWeeklyAttendance() {
       console.log('Final weekly data:', weekData);
       return weekData;
     },
-    staleTime: 0,
-    refetchOnWindowFocus: true,
+    staleTime: 1000 * 60 * 10, // 10 minutos - ¡CORREGIDO!
+    refetchOnWindowFocus: false, // 🚨 ¡CORREGIDO! Evitar bucle infinito
+    retry: 1, // Solo 1 reintento
+    gcTime: 1000 * 60 * 15, // 15 minutos
   });
 }

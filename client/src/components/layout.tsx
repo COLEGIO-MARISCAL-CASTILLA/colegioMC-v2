@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { 
   LayoutDashboard, 
   GraduationCap, 
@@ -17,6 +18,7 @@ import {
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const [location] = useLocation();
+  const isMobile = useIsMobile();
 
   if (!user) return <>{children}</>;
 
@@ -26,13 +28,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     const overlay = document.getElementById('overlay');
     if (sidebar && overlay) {
       // Solo ocultar en móvil (pantallas pequeñas)
-      if (window.innerWidth < 1024) {
+      if (isMobile) {
         sidebar.classList.add('-translate-x-full');
         sidebar.classList.remove('translate-x-0');
         overlay.classList.add('hidden');
       }
     }
-  }, [location]); // Se ejecuta al cambiar de ruta
+  }, [location, isMobile]); // Se ejecuta al cambiar de ruta
 
   const adminLinks = [
     { href: "/", label: "Panel", icon: LayoutDashboard },
