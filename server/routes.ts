@@ -457,32 +457,45 @@ export async function registerRoutes(
 
   // Seed - Create admin user if not exists
   try {
-    console.log("Checking for admin user...");
+    console.log("🔍 Checking for admin user...");
+    console.log("🔍 DATABASE_URL:", process.env.DATABASE_URL ? "SET" : "NOT SET");
     
     // Check if users table exists and has records
     const existingUsers = await db.select().from(users).limit(1);
+    console.log(`🔍 Found ${existingUsers.length} users in database`);
     
     if (existingUsers.length === 0) {
-      console.log("No users found, creating admin user...");
+      console.log("🚨 No users found, creating admin user...");
+      console.log(`🔧 ADMIN_USERNAME: ${process.env.ADMIN_USERNAME || 'admin'}`);
+      console.log(`🔧 ADMIN_PASSWORD: ${process.env.ADMIN_PASSWORD ? '***SET***' : 'NOT SET (using admin123)'}`);
       
       // Create admin user with environment variables
-      const hashed = await hashPassword(process.env.ADMIN_PASSWORD || 'admin123');
-      await storage.createUser({
-        username: process.env.ADMIN_USERNAME || 'admin',
+      const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+      const adminUsername = process.env.ADMIN_USERNAME || 'admin';
+      
+      console.log(`🔑 Creating admin user: ${adminUsername}`);
+      const hashed = await hashPassword(adminPassword);
+      
+      const newAdmin = await storage.createUser({
+        username: adminUsername,
         password: hashed,
         nombre: 'Directora Mariscal Castilla',
         rol: 'directora'
       });
       
-      console.log('✅ Admin user created successfully');
-      console.log(`   Username: ${process.env.ADMIN_USERNAME || 'admin'}`);
-      console.log(`   Password: ${process.env.ADMIN_PASSWORD || 'admin123'}`);
+      console.log('✅ Admin user created successfully:', newAdmin);
+      console.log(`   Username: ${adminUsername}`);
+      console.log(`   Password: ${adminPassword}`);
     } else {
       console.log("✅ Users already exist in database");
+      console.log(`   First user: ${existingUsers[0].username}`);
     }
   } catch (tableError) {
+    console.error("❌ Database seeding error:", tableError);
+    if (tableError instanceof Error) {
+      console.error("❌ Stack trace:", tableError.stack);
+    }
     console.log("⚠️ Database tables might not exist yet. Run: npm run db:push");
-    console.error("Table error:", tableError);
   }
 
   console.log("🎉 Server setup completed successfully");
