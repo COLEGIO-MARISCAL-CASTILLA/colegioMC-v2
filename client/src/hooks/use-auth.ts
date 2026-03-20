@@ -8,10 +8,24 @@ export function useAuth() {
   const { data: user, isLoading, error } = useQuery({
     queryKey: [api.auth.me.path],
     queryFn: async () => {
-      const res = await fetch(api.auth.me.path, { credentials: "include" });
-      if (res.status === 401) return null;
-      if (!res.ok) throw new Error("Failed to fetch user");
-      return res.json(); // Relying on generic JSON parsing since it's an internal type
+      // Crear AbortController con timeout manual
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 segundos
+      
+      try {
+        const res = await fetch(api.auth.me.path, { 
+          credentials: "include",
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        
+        if (res.status === 401) return null;
+        if (!res.ok) throw new Error("Failed to fetch user");
+        return res.json(); // Relying on generic JSON parsing since it's an internal type
+      } catch (error) {
+        clearTimeout(timeoutId);
+        throw error;
+      }
     },
     retry: false,
     staleTime: 1000 * 60 * 5, // 5 minutos
