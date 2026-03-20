@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "dist/index.mjs",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "dist/**/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "dist/index.mjs"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "dist/$1"
+    }
+  ],
+  "functions": {
+    "dist/index.mjs": {
+      "maxDuration": 10
+    }
+  }
+}

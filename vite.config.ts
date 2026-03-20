@@ -21,6 +21,17 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, "dist"),
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['wouter'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-button', '@radix-ui/react-select'],
+          charts: ['recharts']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000
   },
   server: {
     fs: {
