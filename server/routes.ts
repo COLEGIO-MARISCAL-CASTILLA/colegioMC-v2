@@ -27,13 +27,35 @@ export async function registerRoutes(
   });
 
   app.get(api.auth.me.path, (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    
+    // Forzar JSON y desactivar cache para este endpoint
+    res.set({
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+    
     res.json(req.user);
   });
 
   // Endpoint para obtener el usuario actual (/api/user)
   app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    
+    // Forzar JSON y desactivar cache para este endpoint
+    res.set({
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+    
     res.json(req.user);
   });
 
@@ -402,6 +424,15 @@ export async function registerRoutes(
       };
       
       console.log('📈 Dashboard stats calculated:', stats);
+      
+      // Forzar JSON y desactivar cache para este endpoint
+      res.set({
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+      
       res.json(stats);
     } catch (error) {
       console.error('❌ Error in dashboard stats:', error);
