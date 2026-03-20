@@ -13,8 +13,8 @@ export function serveStatic(app: Express) {
 
   app.use(express.static(distPath));
 
-  // fall through to index.html for SPA routes
-  app.get("/*", (_req, res) => {
+  // fall through to index.html for SPA routes (EXCEPT API routes)
+  app.get(/^\/(?!api).*/, (_req, res) => {
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
