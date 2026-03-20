@@ -31,6 +31,12 @@ export async function registerRoutes(
     res.json(req.user);
   });
 
+  // Endpoint para obtener el usuario actual (/api/user)
+  app.get("/api/user", (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    res.json(req.user);
+  });
+
   app.get(api.classrooms.list.path, async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     const result = await storage.getClassrooms();
